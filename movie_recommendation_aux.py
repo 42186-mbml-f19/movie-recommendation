@@ -68,13 +68,13 @@ def get_precision(predictions, val_set):
     true_labels = val_set['like']
     return 1 - sum(abs(predictions - true_labels))/len(true_labels)
     
-def plot_low_variance_movies(fit,movies,num_movies,id_movie_dict):
+def plot_low_variance_movies(fit,movies,num_movies,id_movie_dict, threshold=0.4):
     samples_var,means_var, stds_var, names_var=pystan_utils.vb_extract(fit)
     traits = []
     movieids = []
     for i in range(1,num_movies+1):
         #filter movies with poorly estimated traits
-        if stds_var[f'trait[{i},1]']**2<0.4 and stds_var[f'trait[{i},2]']**2<0.4:
+        if stds_var[f'trait[{i},1]']**2<threshold and stds_var[f'trait[{i},2]']**2<threshold:
             traits.append([means_var[f'trait[{i},1]'],means_var[f'trait[{i},2]']])
             movieids.append(id_movie_dict[i])
 
@@ -82,10 +82,8 @@ def plot_low_variance_movies(fit,movies,num_movies,id_movie_dict):
 
     plt.figure()
     ax = plt.scatter(traits[:,0], traits[:,1])
-    print(len(movieids))
+    print(f"number of movies with low variance posteriors = {len(movieids)}")
     for i, movieid in enumerate(movieids):
-        if 'Lord of the Rings' in movies[movies.movieId==movieid].title.values[0]:
-                print(movieid)
         try:
             plt.annotate(movies[movies.movieId==movieid].title.values[0], (traits[i,0], traits[i,1]))
         except:
