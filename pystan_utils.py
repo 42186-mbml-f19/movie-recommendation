@@ -14,11 +14,13 @@ def vb_extract(fit):
     
     samples_dict = {}
     means_dict = {}
+    std_dict = {}
     for i in xrange(len(var_names)-1):
         samples_dict[var_names[i]] = samples[i,:]
         means_dict[var_names[i]] = fit["mean_pars"][i]
+        std_dict[var_names[i]] = np.std(samples[i,:])
         
-    return samples_dict, means_dict, var_names
+    return samples_dict, means_dict, std_dict, var_names
 
 
 def vb_extract_variable(fit, var_name, var_type="real", dims=None):
