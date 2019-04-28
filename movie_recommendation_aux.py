@@ -2,14 +2,14 @@ import numpy as np
 import pandas as pd
 import pystan_utils
 import matplotlib.pyplot as plt
-def generate_fake_data(val_size=0.1):
+def generate_fake_data(val_size=0.3,seed=42):
     n_group1 = 20
     n_group2 = 20
     n_movies_like_group1 = 20
     n_movies_like_group2 = 20
     userids_group1 = list(range(1,n_group1+1))
     userids_group2 = list(range(n_group1+1,n_group1 + n_group2+1))
-    np.random.seed = 42
+    np.random.seed = seed
     train_set = []
     val_set = []
     for movie in range(1,n_movies_like_group1+1):
