@@ -50,10 +50,10 @@ def generate_fake_data(val_size=0.3,seed=42):
         np.array(val_set), columns=['userId', 'movieId', 'movieIdNoHoles','like'])
     return train_set, val_set
 
-def generate_data_dict(train_set, val_set, n_traits=2):
+def generate_data_dict(train_set, val_set, n_traits=2, stars=False):
     num_movies = len(train_set.movieIdNoHoles.unique())
     num_users = len(train_set.userId.unique())
-    return {'num_movies': num_movies,
+    data_dict =  {'num_movies': num_movies,
         'likes_obs': train_set['like'], 
         'num_traits': n_traits, 
         'num_users': num_users, 
@@ -63,7 +63,11 @@ def generate_data_dict(train_set, val_set, n_traits=2):
         'num_missing': len(val_set),
         'userId_missing': val_set['userId'],
         'movieId_missing': val_set['movieIdNoHoles']
-    }, num_users, num_movies
+    }
+
+    if stars:
+        data_dict['stars_obs']= train_set['rating']
+    return data_dict, num_users, num_movies
 def get_precision(predictions, val_set):
     true_labels = val_set['like']
     return 1 - sum(abs(predictions - true_labels))/len(true_labels)
@@ -90,3 +94,56 @@ def plot_low_variance_movies(fit,movies,num_movies,id_movie_dict, threshold=0.4)
             #Some of the movieId in ratings is not in the movie dataset
             pass
     
+
+
+def get_NDCG(probabilitites, val_set, k=5):
+
+    df = val_set.copy()
+    df['probability'] = probabilitites
+    
+    #take k highest probability for each user
+    df = df.sort_values('probability',ascending=False).groupby('userId').head(k)
+
+    #Calculate the normalized discounted cumulative gain for each user
+    result = 0.0
+    n_users = len(df['userId'].unique())
+
+    for userId in df['userId'].unique():
+        
+        ratings = df[df['userId']==userId]['rating']
+
+        result += NDCG(ratings)
+    #return the average over users
+    return result/n_users
+    
+def DCG(r, k):
+    """Score is discounted cumulative gain (dcg)
+
+    Args:
+        r: Relevance scores (list or numpy) in rank order
+            (first element is the first item)
+        k: Number of results to consider
+      
+    Returns:
+        Discounted cumulative gain
+    """
+    r = np.asfarray(r)[:k]
+    if r.size:
+            return np.sum(r / np.log2(np.arange(2, r.size + 2)))
+    return 0.
+
+def NDCG(r, k=5):
+    """Score is normalized discounted cumulative gain (ndcg)
+
+    Args:
+        r: Relevance scores (list or numpy) in rank order
+            (first element is the first item)
+        k: Number of results to consider
+    
+    Returns:
+        Normalized discounted cumulative gain
+    """
+    dcg_max = DCG(sorted(r, reverse=True), k)
+    if not dcg_max:
+        return 0.
+    return DCG(r, k) / dcg_max

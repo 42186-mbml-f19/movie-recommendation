@@ -8,6 +8,24 @@ if sys.version_info[0] == 3:
     def xrange(i):
         return range(i)
 
+
+
+def vb_extract_predictions(fit, multi_class=False):
+    """
+    Returns the predictions aswell as the mean of the posterior probabilities
+    """
+    var_idx = [i for i,param_name in enumerate(fit['sampler_param_names']) if 'prediction' in param_name ]
+    predictions = []
+    posterior_mean_probabilities = []
+    for idx in var_idx:
+        if multi_class:
+            predictions.append(int(fit['mean_pars'][idx] >= 5.0))
+        else:
+            predictions.append(fit['mean_pars'][idx])
+        posterior_mean_probabilities.append(np.mean(fit['sampler_params'][idx]))
+    return predictions, posterior_mean_probabilities
+
+
 def vb_extract(fit):
     var_names = fit["sampler_param_names"]
     samples = np.array([x for x in fit["sampler_params"]])
