@@ -50,6 +50,37 @@ def generate_fake_data(val_size=0.3,seed=42):
         np.array(val_set), columns=['userId', 'movieId', 'movieIdNoHoles','like'])
     return train_set, val_set
 
+
+def genre_encoding(genres):
+    genre_dict= {"Action":0
+    ,"Adventure":1
+    ,"Animation":2
+    ,"Children":3
+    ,'Comedy':4
+    ,'Crime':5
+    ,'Documentary':6
+    ,'Drama':7
+    ,'Fantasy':8
+    ,'Film-Noir':9
+    ,'Horror':10
+    ,'Musical':11
+    ,'Mystery':12
+    ,'Romance':13
+    ,'Sci-Fi':14
+    ,'Thriller':15
+    ,'War':16
+    ,'Western':17
+    ,'(no genres listed)':18
+    ,'IMAX':19}
+    num_genres = len(genre_dict)
+    
+    encoding= [0]*num_genres
+    for genre in genres.split('|'):
+        encoding[genre_dict[genre]]= 1
+    encoding_sum = sum(encoding)
+    encoding= [e/encoding_sum for e in encoding]
+    return encoding
+
 def generate_data_dict(train_set, val_set, n_traits=2, stars=False):
     num_movies = len(train_set.movieIdNoHoles.unique())
     num_users = len(train_set.userId.unique())
@@ -62,7 +93,8 @@ def generate_data_dict(train_set, val_set, n_traits=2, stars=False):
         'movieId_obs': train_set['movieIdNoHoles'],
         'num_missing': len(val_set),
         'userId_missing': val_set['userId'],
-        'movieId_missing': val_set['movieIdNoHoles']
+        'movieId_missing': val_set['movieIdNoHoles'],
+        'genre': np.asarray(list(train_set['genre_encoding']))
     }
 
     if stars:
