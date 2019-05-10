@@ -81,7 +81,7 @@ def genre_encoding(genres):
     encoding= [e/encoding_sum for e in encoding]
     return encoding
 
-def generate_data_dict(train_set, val_set, n_traits=2, stars=False):
+def generate_data_dict(train_set, val_set, n_traits=2, genre=False, stars=False):
     num_movies = len(train_set.movieIdNoHoles.unique())
     num_users = len(train_set.userId.unique())
     data_dict =  {'num_movies': num_movies,
@@ -93,12 +93,13 @@ def generate_data_dict(train_set, val_set, n_traits=2, stars=False):
         'movieId_obs': train_set['movieIdNoHoles'],
         'num_missing': len(val_set),
         'userId_missing': val_set['userId'],
-        'movieId_missing': val_set['movieIdNoHoles'],
-        'genre': np.asarray(list(train_set['genre_encoding']))
+        'movieId_missing': val_set['movieIdNoHoles']
     }
 
     if stars:
-        data_dict['stars_obs']= train_set['rating']
+        data_dict['stars_obs'] = train_set['rating']
+    if genre:
+        data_dict['genre'] =  np.asarray(list(train_set['genre_encoding']))
     return data_dict, num_users, num_movies
 def get_precision(predictions, val_set):
     true_labels = val_set['like']

@@ -10,7 +10,7 @@ if sys.version_info[0] == 3:
 
 
 
-def vb_extract_predictions(fit, multi_class=False):
+def vb_extract_predictions(fit):
     """
     Returns the predictions aswell as the mean of the posterior probabilities
     """
@@ -18,10 +18,7 @@ def vb_extract_predictions(fit, multi_class=False):
     predictions = []
     posterior_mean_probabilities = []
     for idx in var_idx:
-        if multi_class:
-            predictions.append(int(fit['mean_pars'][idx] >= 5.0))
-        else:
-            predictions.append(fit['mean_pars'][idx])
+        predictions.append(fit['mean_pars'][idx])
         posterior_mean_probabilities.append(np.mean(fit['sampler_params'][idx]))
     return predictions, posterior_mean_probabilities
 
